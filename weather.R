@@ -1,13 +1,11 @@
 ## 
-#
 #  weather.R
 #  Dave Varon 
 #  Created 2013
 #  Revised 
-#    2
+#    2016-02-25 generalized methods and comments
 
 ## CONSTANTS
-
 url.base       <- "ftp://ftp.ncdc.noaa.gov"
 url.path       <- "/pub/data/noaa/"
 stations.index <- "isd-history.csv"
@@ -16,7 +14,6 @@ path.raw       <- paste0(path.local,"raw/")
 path.current   <- paste0(path.local,"current/")
 path.csv       <- paste0(path.local,"csv/")
 stations.index.local <- paste0(path.local,stations.index)
-
 ##
 
 # the weather station index
@@ -44,6 +41,7 @@ getStation <- function(CTRY="US",STATE="MA",STATION="NORWOOD MEMORIAL AIRPORT") 
   return(stn)
 }
 
+# retrive the files via curl/ftp
 getDataFiles <- function(state="MA",start=2011,end,station,current=TRUE) {
   st      <- station
   path    <- if(current) path.current else path.raw
@@ -57,6 +55,7 @@ getDataFiles <- function(state="MA",start=2011,end,station,current=TRUE) {
   system(paste0("gunzip -r ",path), intern = FALSE, ignore.stderr = TRUE)
 }
 
+# parse the data files and write out csv
 conformFiles <- function(path=path.current) {
   # documentation:  http://www1.ncdc.noaa.gov/pub/data/ish/ish-format-document.pdf
   #                  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
@@ -88,6 +87,7 @@ conformFiles <- function(path=path.current) {
   }
 }
 
+# clean up data dirs
 deleteDataFiles <- function(path=path.current) {
   files   <- list.files(path)
   for (f in 1:length(files)) {
@@ -95,11 +95,15 @@ deleteDataFiles <- function(path=path.current) {
   }
 }
 
+# create data dirs
 createDirs <- function() {
   dir.create(path.csv, recursive = TRUE)
   dir.create(path.raw)
   dir.create(path.current)
 }
+
+
+## THE MEATY BIT:
 
 ## set up for boston, current year
 station <- getStation(STATION="BOSTON")  
